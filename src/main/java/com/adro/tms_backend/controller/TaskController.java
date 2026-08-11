@@ -55,22 +55,8 @@ public class TaskController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dueTo,
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20) Pageable pageable) {
-        if (search != null && !search.isBlank()) {
-            return ResponseEntity.ok(taskService.search(userId, search, pageable));
-        }
-        if (status != null) {
-            return ResponseEntity.ok(taskService.listByStatus(userId, status, pageable));
-        }
-        if (priority != null) {
-            return ResponseEntity.ok(taskService.listByPriority(userId, priority, pageable));
-        }
-        if (dueFrom != null && dueTo != null) {
-            return ResponseEntity.ok(taskService.listByDueDateRange(userId, dueFrom, dueTo, pageable));
-        }
-        if (archived != null) {
-            return ResponseEntity.ok(taskService.listByArchived(userId, archived, pageable));
-        }
-        return ResponseEntity.ok(taskService.list(userId, pageable));
+        return ResponseEntity.ok(
+                taskService.search(userId, status, priority, archived, dueFrom, dueTo, search, pageable));
     }
 
     @PutMapping("/{id}")

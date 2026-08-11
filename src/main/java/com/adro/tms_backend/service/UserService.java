@@ -12,6 +12,7 @@ import com.adro.tms_backend.mapper.UserMapper;
 import com.adro.tms_backend.repository.UserRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public UserDto create(UserCreateRequest request) {
@@ -33,8 +35,7 @@ public class UserService {
 
         User user = User.builder()
                 .email(request.email())
-                // NOTE: hashing is not wired up yet — stored as plain text until auth is built.
-                .passwordHash(request.password())
+                .passwordHash(passwordEncoder.encode(request.password()))
                 .name(request.name())
                 .avatarUrl(request.avatarUrl())
                 .timezone(request.timezone() != null ? request.timezone() : "UTC")

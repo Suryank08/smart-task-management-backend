@@ -15,6 +15,7 @@ import com.adro.tms_backend.mapper.TaskMapper;
 import com.adro.tms_backend.repository.CategoryRepository;
 import com.adro.tms_backend.repository.TagRepository;
 import com.adro.tms_backend.repository.TaskRepository;
+import com.adro.tms_backend.repository.TaskSpecifications;
 import com.adro.tms_backend.repository.UserRepository;
 import java.time.Instant;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,47 +65,19 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TaskDto> list(UUID userId, Pageable pageable) {
+    public Page<TaskDto> search(
+            UUID userId,
+            TaskStatus status,
+            TaskPriority priority,
+            Boolean archived,
+            Instant dueFrom,
+            Instant dueTo,
+            String search,
+            Pageable pageable) {
         requireActiveUser(userId);
-        return taskRepository.findByUserIdAndDeletedAtIsNull(userId, pageable).map(taskMapper::toDto);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<TaskDto> listByStatus(UUID userId, TaskStatus status, Pageable pageable) {
-        requireActiveUser(userId);
-        return taskRepository
-                .findByUserIdAndStatusAndDeletedAtIsNull(userId, status, pageable)
-                .map(taskMapper::toDto);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<TaskDto> listByPriority(UUID userId, TaskPriority priority, Pageable pageable) {
-        requireActiveUser(userId);
-        return taskRepository
-                .findByUserIdAndPriorityAndDeletedAtIsNull(userId, priority, pageable)
-                .map(taskMapper::toDto);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<TaskDto> listByArchived(UUID userId, boolean archived, Pageable pageable) {
-        requireActiveUser(userId);
-        return taskRepository
-                .findByUserIdAndArchivedAndDeletedAtIsNull(userId, archived, pageable)
-                .map(taskMapper::toDto);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<TaskDto> listByDueDateRange(UUID userId, Instant from, Instant to, Pageable pageable) {
-        requireActiveUser(userId);
-        return taskRepository
-                .findByUserIdAndDueDateBetweenAndDeletedAtIsNull(userId, from, to, pageable)
-                .map(taskMapper::toDto);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<TaskDto> search(UUID userId, String query, Pageable pageable) {
-        requireActiveUser(userId);
-        return taskRepository.searchByTitle(userId, query, pageable).map(taskMapper::toDto);
+        Specification<Task> spec =
+                TaskSpecifications.filter(userId, status, priority, archived, dueFrom, dueTo, search);
+        return taskRepository.findAll(spec, pageable).map(taskMapper::toDto);
     }
 
     @Transactional
