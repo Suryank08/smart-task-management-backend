@@ -37,7 +37,8 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/register", "/api/auth/login", "/actuator/health")
+                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                                "/api/auth/register", "/api/auth/login", "/api/auth/forgot-password", "/actuator/health")
                         .permitAll()
                         .anyRequest()
                         .authenticated())

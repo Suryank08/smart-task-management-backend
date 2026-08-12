@@ -1,6 +1,7 @@
 package com.adro.tms_backend.controller;
 
 import com.adro.tms_backend.dto.AuthResponse;
+import com.adro.tms_backend.dto.ForgotPasswordRequest;
 import com.adro.tms_backend.dto.LoginRequest;
 import com.adro.tms_backend.dto.UserCreateRequest;
 import com.adro.tms_backend.service.AuthService;
@@ -27,5 +28,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.requestPasswordReset(request);
+        return ResponseEntity.noContent().build();
     }
 }
