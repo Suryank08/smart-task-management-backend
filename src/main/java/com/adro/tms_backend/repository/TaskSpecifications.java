@@ -23,7 +23,7 @@ public final class TaskSpecifications {
             UUID userId,
             TaskStatus status,
             TaskPriority priority,
-            Boolean archived,
+            Boolean pinned,
             Instant dueFrom,
             Instant dueTo,
             String search) {
@@ -38,8 +38,8 @@ public final class TaskSpecifications {
             if (priority != null) {
                 predicates.add(cb.equal(root.get("priority"), priority));
             }
-            if (archived != null) {
-                predicates.add(cb.equal(root.get("archived"), archived));
+            if (pinned != null) {
+                predicates.add(cb.equal(root.get("pinned"), pinned));
             }
             if (dueFrom != null && dueTo != null) {
                 predicates.add(cb.between(root.get("dueDate"), dueFrom, dueTo));

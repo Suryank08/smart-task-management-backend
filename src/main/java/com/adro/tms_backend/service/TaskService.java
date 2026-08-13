@@ -17,8 +17,14 @@ import com.adro.tms_backend.repository.TagRepository;
 import com.adro.tms_backend.repository.TaskRepository;
 import com.adro.tms_backend.repository.TaskSpecifications;
 import com.adro.tms_backend.repository.UserRepository;
+import com.adro.tms_backend.repository.ReminderRepository;
+import com.adro.tms_backend.repository.SubtaskRepository;
+import com.adro.tms_backend.entity.Reminder;
+import com.adro.tms_backend.entity.Subtask;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +42,8 @@ public class TaskService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
+    private final ReminderRepository reminderRepository;
+    private final SubtaskRepository subtaskRepository;
     private final TaskMapper taskMapper;
 
     @Transactional
@@ -53,10 +61,30 @@ public class TaskService {
                 .startDate(request.startDate())
                 .dueDate(request.dueDate())
                 .estimatedMinutes(request.estimatedMinutes())
+                .reminderAt(request.reminderAt())
+                .pinned(request.pinned() != null ? request.pinned() : false)
                 .tags(resolveOwnedTags(request.tagIds(), userId))
                 .build();
 
-        return taskMapper.toDto(taskRepository.save(task));
+        Task saved = taskRepository.save(task);
+        updateTaskReminders(saved, request.reminderAt());
+
+        if (request.subtasks() != null && !request.subtasks().isEmpty()) {
+            int position = 0;
+            for (String subtaskTitle : request.subtasks()) {
+                if (subtaskTitle != null && !subtaskTitle.isBlank()) {
+                    Subtask subtask = Subtask.builder()
+                            .task(saved)
+                            .title(subtaskTitle.trim())
+                            .completed(false)
+                            .position(position++)
+                            .build();
+                    subtaskRepository.save(subtask);
+                }
+            }
+        }
+
+        return taskMapper.toDto(saved);
     }
 
     @Transactional(readOnly = true)
@@ -69,14 +97,14 @@ public class TaskService {
             UUID userId,
             TaskStatus status,
             TaskPriority priority,
-            Boolean archived,
+            Boolean pinned,
             Instant dueFrom,
             Instant dueTo,
             String search,
             Pageable pageable) {
         requireActiveUser(userId);
         Specification<Task> spec =
-                TaskSpecifications.filter(userId, status, priority, archived, dueFrom, dueTo, search);
+                TaskSpecifications.filter(userId, status, priority, pinned, dueFrom, dueTo, search);
         return taskRepository.findAll(spec, pageable).map(taskMapper::toDto);
     }
 
@@ -93,7 +121,15 @@ public class TaskService {
             task.setCompletedAt(request.status() == TaskStatus.COMPLETED ? Instant.now() : null);
         }
 
-        return taskMapper.toDto(taskRepository.save(task));
+        Task saved = taskRepository.save(task);
+
+        if (saved.getStatus() == TaskStatus.COMPLETED || saved.getStatus() == TaskStatus.CANCELLED) {
+            reminderRepository.deleteByTaskIdAndSentAtIsNull(saved.getId());
+        } else {
+            updateTaskReminders(saved, request.reminderAt());
+        }
+
+        return taskMapper.toDto(saved);
     }
 
     @Transactional
@@ -101,6 +137,7 @@ public class TaskService {
         Task task = getOwnedTask(id, userId);
         task.setDeletedAt(Instant.now());
         taskRepository.save(task);
+        reminderRepository.deleteByTaskIdAndSentAtIsNull(task.getId());
     }
 
     private Task getOwnedTask(UUID id, UUID userId) {
@@ -147,5 +184,29 @@ public class TaskService {
             }
         }
         return tags;
+    }
+
+    private void updateTaskReminders(Task task, Instant reminderAt) {
+        reminderRepository.deleteByTaskIdAndSentAtIsNull(task.getId());
+        if (reminderAt != null) {
+            Reminder primary = Reminder.builder()
+                    .task(task)
+                    .remindAt(reminderAt)
+                    .channel("EMAIL")
+                    .build();
+            reminderRepository.save(primary);
+
+            if (task.getDueDate() != null && task.getEstimatedMinutes() != null) {
+                Instant limitTime = task.getDueDate().minus(Duration.ofMinutes(task.getEstimatedMinutes() + 60));
+                if (reminderAt.isBefore(limitTime)) {
+                    Reminder secondary = Reminder.builder()
+                            .task(task)
+                            .remindAt(limitTime)
+                            .channel("EMAIL")
+                            .build();
+                    reminderRepository.save(secondary);
+                }
+            }
+        }
     }
 }

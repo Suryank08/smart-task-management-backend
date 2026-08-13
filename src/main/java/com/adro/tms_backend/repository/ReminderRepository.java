@@ -21,4 +21,6 @@ public interface ReminderRepository extends JpaRepository<Reminder, UUID> {
             + "where r.sentAt is null and r.remindAt <= :now and upper(r.channel) = 'EMAIL' "
             + "and t.deletedAt is null")
     List<Reminder> findDueEmailReminders(@Param("now") Instant now);
+
+    void deleteByTaskIdAndSentAtIsNull(UUID taskId);
 }

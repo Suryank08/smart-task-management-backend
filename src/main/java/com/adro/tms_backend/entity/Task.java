@@ -90,9 +90,9 @@ public class Task {
     @Column(name = "actual_minutes")
     private Integer actualMinutes;
 
-    @Column(name = "is_archived", nullable = false)
+    @Column(name = "is_pinned", nullable = false)
     @Builder.Default
-    private boolean archived = false;
+    private boolean pinned = false;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "ai_metadata", columnDefinition = "jsonb", nullable = false)
@@ -117,4 +117,8 @@ public class Task {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
+
+    @Column(name = "reminder_at")
+    private Instant reminderAt;
 }
+

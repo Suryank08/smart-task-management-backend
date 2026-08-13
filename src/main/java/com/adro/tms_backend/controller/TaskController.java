@@ -50,13 +50,13 @@ public class TaskController {
             @PathVariable UUID userId,
             @RequestParam(required = false) TaskStatus status,
             @RequestParam(required = false) TaskPriority priority,
-            @RequestParam(required = false) Boolean archived,
+            @RequestParam(required = false) Boolean pinned,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dueFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dueTo,
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(
-                taskService.search(userId, status, priority, archived, dueFrom, dueTo, search, pageable));
+                taskService.search(userId, status, priority, pinned, dueFrom, dueTo, search, pageable));
     }
 
     @PutMapping("/{id}")
