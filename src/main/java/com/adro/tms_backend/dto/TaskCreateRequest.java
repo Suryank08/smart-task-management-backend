@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,4 +17,7 @@ public record TaskCreateRequest(
         Instant startDate,
         Instant dueDate,
         @Positive Integer estimatedMinutes,
-        Set<UUID> tagIds) {}
+        Instant reminderAt,
+        Set<UUID> tagIds,
+        Boolean pinned,
+        List<String> subtasks) {}

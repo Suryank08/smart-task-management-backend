@@ -20,8 +20,9 @@ public record TaskDto(
         Instant completedAt,
         Integer estimatedMinutes,
         Integer actualMinutes,
-        boolean archived,
+        boolean pinned,
         Map<String, Object> aiMetadata,
         Set<UUID> tagIds,
+        Instant reminderAt,
         Instant createdAt,
         Instant updatedAt) {}
