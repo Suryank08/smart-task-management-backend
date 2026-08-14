@@ -87,17 +87,9 @@ public class Task {
     @Column(name = "estimated_minutes")
     private Integer estimatedMinutes;
 
-    @Column(name = "actual_minutes")
-    private Integer actualMinutes;
-
     @Column(name = "is_pinned", nullable = false)
     @Builder.Default
     private boolean pinned = false;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "ai_metadata", columnDefinition = "jsonb", nullable = false)
-    @Builder.Default
-    private Map<String, Object> aiMetadata = new HashMap<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

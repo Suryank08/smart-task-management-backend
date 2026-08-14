@@ -1,20 +1,17 @@
 package com.adro.tms_backend.entity;
 
-import com.adro.tms_backend.entity.enums.RecurrenceFrequency;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +25,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "recurring_patterns")
+@Table(name = "ai_plans")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
@@ -36,31 +33,19 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(of = "id")
-public class RecurringPattern {
+public class AiPlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_id", nullable = false, unique = true)
-    private Task task;
-
-    @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(columnDefinition = "recurrence_frequency", nullable = false)
-    private RecurrenceFrequency frequency;
-
-    @Column(name = "interval_count", nullable = false)
-    @Builder.Default
-    private int intervalCount = 1;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "days_of_week", columnDefinition = "jsonb")
-    private List<Integer> daysOfWeek;
-
-    @Column(name = "end_date")
-    private Instant endDate;
+    @Column(name = "plan_details", columnDefinition = "jsonb", nullable = false)
+    private Map<String, Object> planDetails;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

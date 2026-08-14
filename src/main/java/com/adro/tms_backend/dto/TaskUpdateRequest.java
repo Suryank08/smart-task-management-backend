@@ -19,7 +19,6 @@ public record TaskUpdateRequest(
         Instant startDate,
         Instant dueDate,
         @Positive Integer estimatedMinutes,
-        @PositiveOrZero Integer actualMinutes,
         boolean pinned,
         Instant reminderAt,
         Set<UUID> tagIds) {}

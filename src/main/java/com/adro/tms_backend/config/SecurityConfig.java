@@ -57,7 +57,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of(
                 "https://tms-backend-api-rd6j.onrender.com",
-                "https://do-it-08.web.app"
+                "https://do-it-08.web.app",
+                "http://localhost:4200",
+                "http://localhosthost:4200",
+                "http://127.0.0.1:4200"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));

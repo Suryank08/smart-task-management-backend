@@ -28,7 +28,6 @@ public interface TaskMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "tags", ignore = true)
     @Mapping(target = "completedAt", ignore = true)
-    @Mapping(target = "aiMetadata", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
